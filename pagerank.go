@@ -1,5 +1,9 @@
 package pagerank
 
+import (
+	"math"
+)
+
 type PageRank struct {
 	Alpha float64
 }
@@ -17,8 +21,8 @@ func (pg *PageRank) GetVector(adj_matrix [][]float64) []float64 {
 
 func (pg *PageRank) PowerMethod(transition [][]float64) []float64 {
 	pagerank := pg.initVector(len(transition))
-	loop := 0
-	for loop < 20 {
+	var loss float64
+	for loss > 0.0001 {
 		vector := make([]float64, len(pagerank))
 		for i := 0; i < len(pagerank); i++ {
 			sum := 0.0
@@ -27,10 +31,18 @@ func (pg *PageRank) PowerMethod(transition [][]float64) []float64 {
 			}
 			vector[i] = sum
 		}
+		loss = computeLoss(pagerank, vector)
 		pagerank = vector
-		loop++
 	}
 	return pagerank
+}
+
+func computeLoss(vector, new_vector []float64) float64 {
+	var loss float64
+	for i := 0; i < len(vector); i++ {
+		loss += math.Abs(vector[i] - new_vector[i])
+	}
+	return loss
 }
 
 func (pg *PageRank) initVector(column int) []float64 {
